@@ -26,6 +26,30 @@
 	    </tr>
 	</table>
 
+	<br/><br/>
+
+	<table class="listing" summary="Business Unit list">
+	  	<tr class="header">
+	  	  <th>ID</th>
+	  	  <th>Business Unit</th>
+	  	  <th>Industry</th>
+	  	  <th>Actions</th>
+	  	</tr>
+
+		<% @company.business_units.each do |business_unit| %>
+		  	<tr>
+		  	  <td><%= business_unit.id %></td>
+		  	  <td><%= business_unit.name %></td>
+		  	  <td><%= business_unit.industry %></td>
+		  	  <td class="actions">
+		  	  	<%= link_to("Show", '#', :class => 'action show') %>
+		  	  	<%= link_to("Edit", '#', :class => 'action edit') %>
+		  	  	<%= link_to("Delete", '#', :class => 'action delete') %>
+		  	  </td>
+		  	</tr>
+		<% end %>
+	</table>
+
 </div>
 
 
