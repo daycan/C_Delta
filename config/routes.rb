@@ -1,4 +1,14 @@
 Rails.application.routes.draw do
+  get 'companies/index'
+
+  get 'companies/show'
+
+  get 'companies/new'
+
+  get 'companies/edit'
+
+  get 'companies/delete'
+
   devise_for :companies
   get 'welcome/index'
 

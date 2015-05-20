@@ -1,0 +1,27 @@
+<div class="company index">
+  <h2>Companies</h2>
+  <%= link_to("Add New Company", '#', :class => 'action new') %>
+  <table class="listing" summary="Company list">
+  	<tr class="header">
+  	  <th>ID</th>
+  	  <th>Legal Name</th>
+  	  <th>Informal Name</th>
+  	  <th>Email</th>
+  	  <th>Actions</th>
+  	</tr>
+  	<% @companies.each do |company| %>
+  	<tr>
+  	  <td><%= company.id %></td>
+  	  <td><%= company.name_legal %></td>
+  	  <td><%= company.name_informal %></td>
+  	  <td><%= company.email %></td>
+  	  <td class="actions">
+  	  	<%= link_to("Show", '#', :class => 'action show') %>
+  	  	<%= link_to("Edit", '#', :class => 'action edit') %>
+  	  	<%= link_to("Delete", '#', :class => 'action delete') %>
+  	  </td>
+  	</tr>
+  	<% end %>
+  </table>
+</div>
+
