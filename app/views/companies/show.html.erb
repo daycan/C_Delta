@@ -1,2 +1,31 @@
-<h1>Companies#show</h1>
-<p>Find me in app/views/companies/show.html.erb</p>
+<%= link_to("Back to List", {:action => 'index'}, :class => 'back-link') %>
+
+<div class="companies show">
+  	<h2>Show Company</h2>
+
+  	<table summary="Company Detail View">
+	  	<tr>
+	      	<th>ID</th>
+	      	<td><%= @company.id %></td>
+	    </tr>
+	    <tr>
+	      	<th>Legal Name</th>
+	      	<td><%= @company.name_legal %></td>
+	    </tr>
+	    <tr>
+	    	<th>Informal Name</th>
+	    	<td><%= @company.name_informal %></td>
+	    </tr>
+	    <tr>
+	    	<th>Created</th>
+	    	<td><%= @company.created_at %></td>
+	    </tr>
+	    <tr>
+	    	<th>Updated</th>
+	    	<td><%= @company.updated_at %></td>
+	    </tr>
+	</table>
+
+</div>
+
+
