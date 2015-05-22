@@ -1,7 +1,6 @@
 class DemoController < ApplicationController
 
   layout false
-  before_action :authenticate_company!
 
   def index
   end

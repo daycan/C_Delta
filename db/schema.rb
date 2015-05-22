@@ -11,22 +11,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150519225902) do
+ActiveRecord::Schema.define(version: 20150522190951) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "business_units", force: :cascade do |t|
-    t.string   "name",       limit: 100
-    t.string   "industry",   limit: 100
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+    t.string   "name",            limit: 100
+    t.string   "industry",        limit: 100
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
     t.integer  "company_id"
+    t.integer  "organization_id"
   end
 
   add_index "business_units", ["company_id"], name: "index_business_units_on_company_id", using: :btree
   add_index "business_units", ["industry"], name: "index_business_units_on_industry", using: :btree
   add_index "business_units", ["name"], name: "index_business_units_on_name", using: :btree
+  add_index "business_units", ["organization_id"], name: "index_business_units_on_organization_id", using: :btree
 
   create_table "companies", force: :cascade do |t|
     t.string   "name_legal",             limit: 100
@@ -50,5 +52,17 @@ ActiveRecord::Schema.define(version: 20150519225902) do
   add_index "companies", ["name_informal"], name: "index_companies_on_name_informal", using: :btree
   add_index "companies", ["name_legal"], name: "index_companies_on_name_legal", using: :btree
   add_index "companies", ["reset_password_token"], name: "index_companies_on_reset_password_token", unique: true, using: :btree
+
+  create_table "organizations", force: :cascade do |t|
+    t.string   "name_legal",    limit: 100
+    t.string   "name_informal", limit: 50
+    t.string   "industry",      limit: 100
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+  end
+
+  add_index "organizations", ["industry"], name: "index_organizations_on_industry", using: :btree
+  add_index "organizations", ["name_informal"], name: "index_organizations_on_name_informal", using: :btree
+  add_index "organizations", ["name_legal"], name: "index_organizations_on_name_legal", using: :btree
 
 end

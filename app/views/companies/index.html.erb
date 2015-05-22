@@ -17,7 +17,7 @@
   	  <td><%= company.email %></td>
   	  <td class="actions">
   	  	<%= link_to("Show", {:action => 'show', :id => company.id}, :class => 'action show') %>
-  	  	<%= link_to("Edit", '#', :class => 'action edit') %>
+  	  	<%= link_to("Edit", {:action => 'edit', :id => company.id}, :class => 'action edit') %>
   	  	<%= link_to("Delete", '#', :class => 'action delete') %>
   	  </td>
   	</tr>

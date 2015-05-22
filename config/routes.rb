@@ -1,16 +1,10 @@
 Rails.application.routes.draw do
-  get 'companies/index'
 
-  get 'companies/show'
 
-  get 'companies/new'
-
-  get 'companies/edit'
-
-  get 'companies/delete'
-
+  resources :organizations
+  resources :business_units
   devise_for :companies
-  get 'welcome/index'
+
 
   root "welcome#index"
   get 'demo/index'

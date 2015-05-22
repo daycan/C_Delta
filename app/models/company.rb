@@ -7,6 +7,9 @@ class Company < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
 
+  accepts_nested_attributes_for :business_units
+  
+
 
 
 end
