@@ -55,4 +55,23 @@
 		<% end %>
 	</table>
 
+	<%= form_for @business_unit, :url => create_business_unit_organization_path(@organization) do |f| %>
+		  <table summary="Business Unit form fields">
+		      <tr>
+		        <th>Name</th>
+		        <td><%= f.text_field(:name) %></td>
+		      </tr>
+		      <tr>
+		        <th>Industry</th>
+		        <td><%= f.text_field(:industry) %></td>
+		      </tr>
+		  </table>
+
+		  <div class="actions">
+		    <%= f.submit %>
+		  </div>
+
+	<% end %>
+
+
 </div>

@@ -10,6 +10,7 @@ class OrganizationsController < ApplicationController
   # GET /organizations/1
   # GET /organizations/1.json
   def show
+    @business_unit = BusinessUnit.new
   end
 
   # GET /organizations/new
@@ -49,6 +50,15 @@ class OrganizationsController < ApplicationController
         format.json { render json: @organization.errors, status: :unprocessable_entity }
       end
     end
+  end
+
+  def create_business_unit
+    @organization = Organization.find(params[:id])
+    @business_unit = @organization.business_units.build(params[:child])
+    if @business_unit.save
+      @business_unit = BusinessUnit.new
+    end
+    render :action => :show
   end
 
   # DELETE /organizations/1

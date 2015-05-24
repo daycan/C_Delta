@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
 
 
-  resources :organizations
+  resources :organizations do
+    member do
+      post 'create_business_unit'
+    end
+  end
   resources :business_units
   devise_for :companies
 
