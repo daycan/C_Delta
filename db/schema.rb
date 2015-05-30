@@ -66,7 +66,7 @@ ActiveRecord::Schema.define(version: 20150530043325) do
   add_index "organizations", ["name_legal"], name: "index_organizations_on_name_legal", using: :btree
 
   create_table "questions", force: :cascade do |t|
-    t.string   "type"
+    t.string   "question_type"
     t.string   "selector"
     t.string   "sub_selector"
     t.text     "question_text"
@@ -98,14 +98,14 @@ ActiveRecord::Schema.define(version: 20150530043325) do
   add_index "responses", ["start_date"], name: "index_responses_on_start_date", using: :btree
 
   create_table "survey_questions", force: :cascade do |t|
-    t.integer  "questions_id"
-    t.integer  "surveys_id"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.integer  "question_id"
+    t.integer  "survey_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
 
-  add_index "survey_questions", ["questions_id"], name: "index_survey_questions_on_questions_id", using: :btree
-  add_index "survey_questions", ["surveys_id"], name: "index_survey_questions_on_surveys_id", using: :btree
+  add_index "survey_questions", ["question_id"], name: "index_survey_questions_on_question_id", using: :btree
+  add_index "survey_questions", ["survey_id"], name: "index_survey_questions_on_survey_id", using: :btree
 
   create_table "surveys", force: :cascade do |t|
     t.integer  "business_unit_id"
