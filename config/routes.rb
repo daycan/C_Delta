@@ -6,13 +6,15 @@ Rails.application.routes.draw do
       post 'create_business_unit'
     end
   end
+  
   resources :business_units
+  
   devise_for :companies
 
 
   root "welcome#index"
   get 'demo/index'
-  match ':controller(/:action(/:id))', :via => :get
+  # match ':controller(/:action(/:id))', :via => :get
   
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

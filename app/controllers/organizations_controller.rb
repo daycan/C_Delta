@@ -54,7 +54,7 @@ class OrganizationsController < ApplicationController
 
   def create_business_unit
     @organization = Organization.find(params[:id])
-    @business_unit = @organization.business_units.build(params[:child])
+    @business_unit = @organization.business_units.build(params[:business_unit])
     if @business_unit.save
       @business_unit = BusinessUnit.new
     end
@@ -79,12 +79,12 @@ class OrganizationsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def organization_params
-      params[:organization].permit(:name_legal, :name_informal, :industry)
+      params[:organization].permit(:name_legal, :name_informal, :industry, business_unit: [:name, :industry])
     end
 
-    #def company_params
-    #  params.require(:company).permit(:name_legal, :name_informal, :email)
-    #end
+    def business_unit_params
+      params[:business_unit].permit(:id, :organization_id, :name, :industry)
+    end
 
 
 end

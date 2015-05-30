@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150522190951) do
+ActiveRecord::Schema.define(version: 20150530043325) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -64,5 +64,68 @@ ActiveRecord::Schema.define(version: 20150522190951) do
   add_index "organizations", ["industry"], name: "index_organizations_on_industry", using: :btree
   add_index "organizations", ["name_informal"], name: "index_organizations_on_name_informal", using: :btree
   add_index "organizations", ["name_legal"], name: "index_organizations_on_name_legal", using: :btree
+
+  create_table "questions", force: :cascade do |t|
+    t.string   "type"
+    t.string   "selector"
+    t.string   "sub_selector"
+    t.text     "question_text"
+    t.string   "question_identifier"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "questions", ["question_identifier"], name: "index_questions_on_question_identifier", using: :btree
+
+  create_table "responses", force: :cascade do |t|
+    t.integer  "business_unit_id"
+    t.string   "qualtrics_response_id"
+    t.string   "qualtrics_response_set"
+    t.string   "name"
+    t.string   "email"
+    t.string   "ip_address"
+    t.integer  "status"
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.integer  "finished"
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
+  add_index "responses", ["business_unit_id"], name: "index_responses_on_business_unit_id", using: :btree
+  add_index "responses", ["end_date"], name: "index_responses_on_end_date", using: :btree
+  add_index "responses", ["finished"], name: "index_responses_on_finished", using: :btree
+  add_index "responses", ["start_date"], name: "index_responses_on_start_date", using: :btree
+
+  create_table "survey_questions", force: :cascade do |t|
+    t.integer  "questions_id"
+    t.integer  "surveys_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "survey_questions", ["questions_id"], name: "index_survey_questions_on_questions_id", using: :btree
+  add_index "survey_questions", ["surveys_id"], name: "index_survey_questions_on_surveys_id", using: :btree
+
+  create_table "surveys", force: :cascade do |t|
+    t.integer  "business_unit_id"
+    t.string   "survey_name"
+    t.integer  "is_active"
+    t.string   "owner_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "surveys", ["is_active"], name: "index_surveys_on_is_active", using: :btree
+  add_index "surveys", ["owner_id"], name: "index_surveys_on_owner_id", using: :btree
+  add_index "surveys", ["survey_name"], name: "index_surveys_on_survey_name", using: :btree
+
+  create_table "surveys_business_units", id: false, force: :cascade do |t|
+    t.integer "survey_id"
+    t.integer "business_unit_id"
+  end
+
+  add_index "surveys_business_units", ["business_unit_id"], name: "index_surveys_business_units_on_business_unit_id", using: :btree
+  add_index "surveys_business_units", ["survey_id"], name: "index_surveys_business_units_on_survey_id", using: :btree
 
 end

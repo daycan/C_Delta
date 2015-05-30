@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  type: 
+  selector: MyString
+  sub_selector: MyString
+  question_text: MyText
+  question_identifier: MyString
+
+two:
+  type: 
+  selector: MyString
+  sub_selector: MyString
+  question_text: MyText
+  question_identifier: MyString

@@ -26,6 +26,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'httparty', '~> 0.13.4'
 # manage accounts
 gem 'devise'
+# let's you parse XML into a ruby object
+gem 'nokogiri', '~> 1.6.6.2'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -45,5 +47,8 @@ group :development, :test do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+
+  gem 'awesome_print', '~> 1.6.1'
+
 end
 
