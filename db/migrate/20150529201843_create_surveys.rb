@@ -5,6 +5,7 @@ class CreateSurveys < ActiveRecord::Migration
       t.string :survey_name
       t.integer :is_active
       t.string :owner_id
+      t.string :qualtrics_identifier
 
       t.timestamps null: false
     end
@@ -17,6 +18,7 @@ class CreateSurveys < ActiveRecord::Migration
     add_index :surveys, :survey_name
     add_index :surveys, :is_active
     add_index :surveys, :owner_id
+    add_index :surveys, :qualtrics_identifier
   end
 end
 

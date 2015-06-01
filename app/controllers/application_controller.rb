@@ -4,6 +4,6 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   # devise authentication to permit user to see the page:
-  before_action :authenticate_company!
+  # before_action :authenticate_company!
 
 end

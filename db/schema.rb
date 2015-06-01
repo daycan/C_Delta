@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150530043325) do
+ActiveRecord::Schema.define(version: 20150601013530) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +52,22 @@ ActiveRecord::Schema.define(version: 20150530043325) do
   add_index "companies", ["name_informal"], name: "index_companies_on_name_informal", using: :btree
   add_index "companies", ["name_legal"], name: "index_companies_on_name_legal", using: :btree
   add_index "companies", ["reset_password_token"], name: "index_companies_on_reset_password_token", unique: true, using: :btree
+
+  create_table "options", force: :cascade do |t|
+    t.integer  "question_id"
+    t.string   "description"
+    t.integer  "option_identifier"
+    t.integer  "recode"
+    t.integer  "has_text"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+  end
+
+  add_index "options", ["description"], name: "index_options_on_description", using: :btree
+  add_index "options", ["has_text"], name: "index_options_on_has_text", using: :btree
+  add_index "options", ["option_identifier"], name: "index_options_on_option_identifier", using: :btree
+  add_index "options", ["question_id"], name: "index_options_on_question_id", using: :btree
+  add_index "options", ["recode"], name: "index_options_on_recode", using: :btree
 
   create_table "organizations", force: :cascade do |t|
     t.string   "name_legal",    limit: 100
@@ -112,12 +128,14 @@ ActiveRecord::Schema.define(version: 20150530043325) do
     t.string   "survey_name"
     t.integer  "is_active"
     t.string   "owner_id"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+    t.string   "qualtrics_identifier"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
   end
 
   add_index "surveys", ["is_active"], name: "index_surveys_on_is_active", using: :btree
   add_index "surveys", ["owner_id"], name: "index_surveys_on_owner_id", using: :btree
+  add_index "surveys", ["qualtrics_identifier"], name: "index_surveys_on_qualtrics_identifier", using: :btree
   add_index "surveys", ["survey_name"], name: "index_surveys_on_survey_name", using: :btree
 
   create_table "surveys_business_units", id: false, force: :cascade do |t|

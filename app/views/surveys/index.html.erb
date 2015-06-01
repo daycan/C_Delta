@@ -1,0 +1,33 @@
+<h1>All C-Delta Surveys</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="6"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr class="header">
+      <th>Survey Name</th>
+      <th>Active</th>
+      <th>Created</th>
+      <th>Updated</th>
+      <th>Actions</th>
+    </tr>
+    <% @survey.each do |s| %>
+      <tr>
+        <td><%= s.survey_name %></td>
+        <td><%= s.is_active %></td>
+        <td><%= s.created_at %></td>
+        <td><%= s.updated_at %></td>
+        <td>
+          <%= link_to 'Show', s %>
+          <%= link_to 'Destroy', s, method: :delete, data: { confirm: 'Are you sure?' } %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>

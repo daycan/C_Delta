@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   end
   
   resources :business_units
+  resources :surveys
   
   devise_for :companies
 

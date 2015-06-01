@@ -4,4 +4,7 @@ class Organization < ActiveRecord::Base
 	accepts_nested_attributes_for :business_units
 
 
+	validates_uniqueness_of :name_legal
+
+
 end

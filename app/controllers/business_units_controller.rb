@@ -49,7 +49,7 @@ class BusinessUnitsController < ApplicationController
   def destroy
     business_unit = BusinessUnit.find(params[:id]).destroy
     flash[:notice] = "Business Unit destroyed successfully."
-    redirect_to(:action => 'index')
+    redirect_to(:controller => 'organization', :action => 'index')
   end
 
   private

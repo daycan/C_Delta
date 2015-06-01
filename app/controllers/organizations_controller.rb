@@ -54,7 +54,7 @@ class OrganizationsController < ApplicationController
 
   def create_business_unit
     @organization = Organization.find(params[:id])
-    @business_unit = @organization.business_units.build(params[:business_unit])
+    @business_unit = @organization.business_units.build(business_unit_params)
     if @business_unit.save
       @business_unit = BusinessUnit.new
     end
@@ -83,7 +83,7 @@ class OrganizationsController < ApplicationController
     end
 
     def business_unit_params
-      params[:business_unit].permit(:id, :organization_id, :name, :industry)
+      params[:business_unit].permit(:name, :industry)
     end
 
 

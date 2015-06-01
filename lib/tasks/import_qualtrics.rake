@@ -1,4 +1,24 @@
 
+def	qualtrics_survey_identifier 
+	"SV_bClgHUmIroUjqdv" 
+end
+
+def user 
+	"daycan@ideo.com"
+end
+	
+def token 
+	"CrgjxL2m2tp54NQqDStoUFBtVEUZgw77sTZFKohY"
+end
+
+def version 
+	"2.4"
+end
+
+def format
+	"XML"
+end
+
 task :add_survey => :environment do
 
 	desc "add a survey to the database"
@@ -7,29 +27,23 @@ task :add_survey => :environment do
 	# Survey token and ID must currently be hard coded in the URL below to import a new survey
 	# Survey currently is not properly attached to Business Units (goes directly to business unit id instead of using the many-to-many relationship style)
 
-	survey_id = "SV_bClgHUmIroUjqdv"
 	request = "getSurvey"
-	user = "daycan@ideo.com"
-	token = "CrgjxL2m2tp54NQqDStoUFBtVEUZgw77sTZFKohY"
-	version = "2.4"
 
-	qualtrics_api_request = "https://survey.qualtrics.com/WRAPI/ControlPanel/api.php?Request=#{request}&User=#{user}&Token=#{token}&Version=#{version}&SurveyID=#{survey_id}"
+	qualtrics_api_request = "https://survey.qualtrics.com/WRAPI/ControlPanel/api.php?Request=#{request}&User=#{user}&Token=#{token}&Version=#{version}&SurveyID=#{qualtrics_survey_identifier}"
 	
 	survey_xml_doc = HTTParty.get(qualtrics_api_request) # grabs the xml export of the survey structure from qualtrics
 	survey = Nokogiri::XML(survey_xml_doc.body) # turns the xml export of the survey into a parsable format (can us .xpath("//tag")) etc.
 
-	# FIX: business_unit_id is being hard-coded here
-	business_unit_id = 1
+	business_unit_id = nil # FIX: business_unit_id is being hard-coded here
 	survey_name = survey.xpath("//SurveyName//text()")
-	is_active = survey.xpath("//isActive//text()")
+	is_active = survey.xpath("//isActive").text
 	owner_id = survey.xpath("//OwnerID//text()")
 
 	
-	@survey = Survey.new({:business_unit_id => business_unit_id, :survey_name => survey_name, :is_active => is_active, :owner_id => owner_id})
+	@survey = Survey.new({:business_unit_id => business_unit_id, :survey_name => survey_name, :is_active => is_active, :owner_id => owner_id, :qualtrics_identifier => qualtrics_survey_identifier})
 	@survey.save
 
 	survey.xpath("//Question").each do |q|
-		ap puts q
 		@question_identifier = q.first[1] # returns the question number in format [QID71]
 		# see if question already exists in the database
 		if @question = Question.where(:question_identifier => @question_identifier).first
@@ -40,9 +54,9 @@ task :add_survey => :environment do
 		  			@selector = child.text
 		  		elsif child.name == "Type"
 		  			@question_type = child.text
-		  		elsif child.name = "QuestionText"
+		  		elsif child.name == "QuestionText"
 		  			@question_text = child.text
-		  		elsif child.name = "SubSelector"
+		  		elsif child.name == "SubSelector"
 		  			@sub_selector = child.text
 		  		end
 		  	end
@@ -51,30 +65,59 @@ task :add_survey => :environment do
 		  	@question.save
 		  	@survey.questions << @question
 
+			# CHECK AND SET OPTIONS
+			# STILL NEED: if question exists, check that the main options have not changed
+			# STILL NEED: Then, if the options have changed, add the new options
+		  	q.xpath(".//Choice").each do |c|
+		  		option_identifier = c.xpath("@ID").first.value
+		  		recode = c.xpath("@Recode").first.value
+		  		has_text = c.xpath("@TextEntry").first.value
+
+		  		c.children.each do |child|
+		  			if child.name == "Description"
+		  				description = child.text
+		  			end
+
+		  			if has_text != 1 then has_text = 0 end
+
+		  			@option = Option.new({:description => description, :option_identifier => option_identifier, :recode => recode, :has_text => has_text })	
+		  			@option.save
+		  			@question.options << @option
+
+		  			has_text = 0 # Set back to default of 0 to re-run check
+
+		  		end		  	
+		  	end
 		end
 
-				#create the options
-			# if question exists, check that the main options have not changed
-				#if the options have changed, add the new options
 
 	end
 end
 
 
+task :get_qualtrics_responses => :environment do
 
-
-task :get_qualtrics_data => :environment do
-	
-	response_xml_doc = HTTParty.get('https://survey.qualtrics.com/WRAPI/ControlPanel/api.php?Request=getLegacyResponseData&User=daycan@ideo.com&Token=CrgjxL2m2tp54NQqDStoUFBtVEUZgw77sTZFKohY&Format=XML&Version=2.4&SurveyID=SV_bClgHUmIroUjqdv')
+	request = "getLegacyResponseData"
+	qualtrics_api_request = 'https://survey.qualtrics.com/WRAPI/ControlPanel/api.php?Request=#{request}&User=#{user}&Token=#{token}&Format=#{format}&Version=#{version}&SurveyID=#{qualtrics_survey_identifier}'
+	response_xml_doc = HTTParty.get(qualtrics_api_request)
 	response  = Nokogiri::XML(response_xml_doc.body)
 	
 	# This SHOULD (does not currently) get the RIGHT survey associated with the response. 
-	@survey = Survey.order("created_at").last
+	@survey = Survey.where({:qualtrics_identifier => qualtrics_survey_identifier }).order("created_at DESC").last
 
 
-	puts ap response
+	response.xpath("//Response").each do |r|
+		response_identifier = r.xpath("./ResponseID").text
+		business_unit_id = 1 # FIX THIS HARD CODING
 
-	
+
+
+	end
+
+
 
 
 end
+
+
+
