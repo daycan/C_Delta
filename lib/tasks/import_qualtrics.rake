@@ -71,22 +71,23 @@ task :add_survey => :environment do
 		  	q.xpath(".//Choice").each do |c|
 		  		option_identifier = c.xpath("@ID").first.value
 		  		recode = c.xpath("@Recode").first.value
-		  		has_text = c.xpath("@TextEntry").first.value
+		  		c.xpath("@TextEntry").each do
+		  			@has_text = 1
+		  			puts "FOUND ONE"
+	  			end		  			
 
 		  		c.children.each do |child|
 		  			if child.name == "Description"
-		  				description = child.text
+		  				@description = child.text
 		  			end
+		  		end
 
-		  			if has_text != 1 then has_text = 0 end
+	  			@option = Option.new({:description => @description, :option_identifier => option_identifier, :recode => recode, :has_text => @has_text })	
+	  			@option.save
+	  			@question.options << @option
 
-		  			@option = Option.new({:description => description, :option_identifier => option_identifier, :recode => recode, :has_text => has_text })	
-		  			@option.save
-		  			@question.options << @option
-
-		  			has_text = 0 # Set back to default of 0 to re-run check
-
-		  		end		  	
+	  			@has_text = 0 # Set back to default of 0 to re-run check
+	  	
 		  	end
 		end
 
