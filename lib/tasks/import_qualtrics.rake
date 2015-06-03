@@ -58,10 +58,12 @@ task :add_survey => :environment do
 		  			@question_text = child.text
 		  		elsif child.name == "SubSelector"
 		  			@sub_selector = child.text
+		  		elsif child.name == "ExportTag"
+		  			@export_tag = child.text
 		  		end
 		  	end
 
-		  	@question = Question.new({:question_type => @question_type, :selector => @selector, :sub_selector => @sub_selector, :question_text => @question_text, :question_identifier => @question_identifier})
+		  	@question = Question.new({:question_type => @question_type, :selector => @selector, :sub_selector => @sub_selector, :question_text => @question_text, :question_identifier => @question_identifier, :export_tag => @export_tag})
 		  	@question.save
 		  	@survey.questions << @question
 
@@ -73,7 +75,6 @@ task :add_survey => :environment do
 		  		recode = c.xpath("@Recode").first.value
 		  		c.xpath("@TextEntry").each do
 		  			@has_text = 1
-		  			puts "FOUND ONE"
 	  			end		  			
 
 		  		c.children.each do |child|
@@ -90,8 +91,6 @@ task :add_survey => :environment do
 	  	
 		  	end
 		end
-
-
 	end
 end
 
@@ -99,26 +98,68 @@ end
 task :get_qualtrics_responses => :environment do
 
 	request = "getLegacyResponseData"
-	qualtrics_api_request = 'https://survey.qualtrics.com/WRAPI/ControlPanel/api.php?Request=#{request}&User=#{user}&Token=#{token}&Format=#{format}&Version=#{version}&SurveyID=#{qualtrics_survey_identifier}'
+	qualtrics_api_request = "https://survey.qualtrics.com/WRAPI/ControlPanel/api.php?Request=#{request}&User=#{user}&Token=#{token}&Format=#{format}&Version=#{version}&SurveyID=#{qualtrics_survey_identifier}"
 	response_xml_doc = HTTParty.get(qualtrics_api_request)
 	response  = Nokogiri::XML(response_xml_doc.body)
 	
 	# This SHOULD (does not currently) get the RIGHT survey associated with the response. 
 	@survey = Survey.where({:qualtrics_identifier => qualtrics_survey_identifier }).order("created_at DESC").last
 
-
 	response.xpath("//Response").each do |r|
-		response_identifier = r.xpath("./ResponseID").text
-		business_unit_id = 1 # FIX THIS HARD CODING
+		qualtrics_response_id = r.xpath("./ResponseID").text
+		if Response.where(qualtrics_response_id: qualtrics_response_id).blank? # Only creates a new response if no response exists with the same response identifier
+			qualtrics_response_set = r.xpath("./ResponseSet").text
+			name = r.xpath("./Name").text
+			email = r.xpath("./EmailAddress").text
+			ip_address = r.xpath("./IPAddress").text
+			status = r.xpath("./Status").text
+			start_date = r.xpath("./StartDate").text
+			end_date = r.xpath("./EndDate").text
+			finished = r.xpath("./Finished").text
+
+			business_unit_id = 1 # FIX THIS HARD CODING
+
+			@response = Response.new(:business_unit_id => business_unit_id, :qualtrics_response_id => qualtrics_response_id, :qualtrics_response_set => qualtrics_response_set, :name => name, :email => email, :ip_address => ip_address, :status => status, :start_date => status, :end_date => end_date, :finished => finished)
+			@response.save
+
+			#cycle through questions and run the logic grabbing the answers from the current Response 'r'
+			@survey.questions.each do |q|
+				if q.question_type != "DB"
+					@answer = Answer.new
+					@answer.response_id = @response.id
+					@answer.survey_id = @survey.id
+					@answer.question_id = q.id
+
+					if q.question_type == "TE"  # Text Entry
+						@answer.text = r.xpath(".//#{q.export_tag}").text
+					elsif q.question_type == "MC" && q.selector == "SAVR" # Multiple Choice Single Answer
+						@answer.value = r.xpath(".//#{q.export_tag}").text
+						if q.options.where(:option_identifier => @answer.value).exists?
+							@option = q.options.where(:option_identifier => @answer.value).first
+							@answer.text = @option.description
+							@answer.option_id = @option.id
+						end
+					elsif q.question_type == "MC" && q.selector == "MACOL" # Multiple Choice, Multiple Answer
+						@answer_set = r.xpath(".//*[starts-with(name(), #{q.export_tag})]")
+					end	
+					@answer.save	
 
 
+				    #t.integer  "response_id"
+				    #t.integer  "survey_id"
+				    #t.integer  "question_id"
+				    #t.string   "value"
+				    #t.string   "text"
+				    #t.string   "name"
+				    #t.integer  "option_id"
+				    #t.datetime "created_at",  null: false
+				    #t.datetime "updated_at",  null: false
+				end
+
+			end
+
+		end
 
 	end
 
-
-
-
 end
-
-
-

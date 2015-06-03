@@ -11,47 +11,42 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150601013530) do
+ActiveRecord::Schema.define(version: 20150601200556) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "answers", force: :cascade do |t|
+    t.integer  "response_id"
+    t.integer  "survey_id"
+    t.integer  "question_id"
+    t.integer  "value"
+    t.string   "text"
+    t.string   "name"
+    t.integer  "option_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "answers", ["name"], name: "index_answers_on_name", using: :btree
+  add_index "answers", ["option_id"], name: "index_answers_on_option_id", using: :btree
+  add_index "answers", ["question_id"], name: "index_answers_on_question_id", using: :btree
+  add_index "answers", ["response_id"], name: "index_answers_on_response_id", using: :btree
+  add_index "answers", ["survey_id"], name: "index_answers_on_survey_id", using: :btree
+  add_index "answers", ["text"], name: "index_answers_on_text", using: :btree
+  add_index "answers", ["value"], name: "index_answers_on_value", using: :btree
+
   create_table "business_units", force: :cascade do |t|
+    t.integer  "organization_id"
     t.string   "name",            limit: 100
     t.string   "industry",        limit: 100
     t.datetime "created_at",                  null: false
     t.datetime "updated_at",                  null: false
-    t.integer  "company_id"
-    t.integer  "organization_id"
   end
 
-  add_index "business_units", ["company_id"], name: "index_business_units_on_company_id", using: :btree
   add_index "business_units", ["industry"], name: "index_business_units_on_industry", using: :btree
   add_index "business_units", ["name"], name: "index_business_units_on_name", using: :btree
   add_index "business_units", ["organization_id"], name: "index_business_units_on_organization_id", using: :btree
-
-  create_table "companies", force: :cascade do |t|
-    t.string   "name_legal",             limit: 100
-    t.string   "name_informal",          limit: 50
-    t.string   "password",               limit: 40
-    t.datetime "created_at",                                      null: false
-    t.datetime "updated_at",                                      null: false
-    t.string   "email",                              default: "", null: false
-    t.string   "encrypted_password",                 default: "", null: false
-    t.string   "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.integer  "sign_in_count",                      default: 0,  null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
-    t.inet     "current_sign_in_ip"
-    t.inet     "last_sign_in_ip"
-  end
-
-  add_index "companies", ["email"], name: "index_companies_on_email", unique: true, using: :btree
-  add_index "companies", ["name_informal"], name: "index_companies_on_name_informal", using: :btree
-  add_index "companies", ["name_legal"], name: "index_companies_on_name_legal", using: :btree
-  add_index "companies", ["reset_password_token"], name: "index_companies_on_reset_password_token", unique: true, using: :btree
 
   create_table "options", force: :cascade do |t|
     t.integer  "question_id"
@@ -87,10 +82,12 @@ ActiveRecord::Schema.define(version: 20150601013530) do
     t.string   "sub_selector"
     t.text     "question_text"
     t.string   "question_identifier"
+    t.string   "export_tag"
     t.datetime "created_at",          null: false
     t.datetime "updated_at",          null: false
   end
 
+  add_index "questions", ["export_tag"], name: "index_questions_on_export_tag", using: :btree
   add_index "questions", ["question_identifier"], name: "index_questions_on_question_identifier", using: :btree
 
   create_table "responses", force: :cascade do |t|

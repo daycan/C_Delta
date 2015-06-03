@@ -6,6 +6,7 @@ class CreateQuestions < ActiveRecord::Migration
       t.string :sub_selector
       t.text :question_text
       t.string :question_identifier
+      t.string :export_tag
 
       t.timestamps null: false
     end
@@ -18,6 +19,7 @@ class CreateQuestions < ActiveRecord::Migration
     end
 
     add_index :questions, :question_identifier
+    add_index :questions, :export_tag
   end
 
 end

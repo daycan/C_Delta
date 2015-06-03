@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  response_id: 1
+  survey_id: 1
+  question_id: 1
+  answer_value: MyString
+  answer_name: MyString
+  option_id: 1
+
+two:
+  response_id: 1
+  survey_id: 1
+  question_id: 1
+  answer_value: MyString
+  answer_name: MyString
+  option_id: 1
