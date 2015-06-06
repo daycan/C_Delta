@@ -125,25 +125,37 @@ task :get_qualtrics_responses => :environment do
 			#cycle through questions and run the logic grabbing the answers from the current Response 'r'
 			@survey.questions.each do |q|
 				if q.question_type != "DB"
-					@answer = Answer.new
-					@answer.response_id = @response.id
-					@answer.survey_id = @survey.id
-					@answer.question_id = q.id
 
 					if q.question_type == "TE"  # Text Entry
+						initiate_answer(q)
 						@answer.text = r.xpath(".//#{q.export_tag}").text
+						@answer.save
 					elsif q.question_type == "MC" && q.selector == "SAVR" # Multiple Choice Single Answer
+						initiate_answer(q)
 						@answer.value = r.xpath(".//#{q.export_tag}").text
 						if q.options.where(:option_identifier => @answer.value).exists?
 							@option = q.options.where(:option_identifier => @answer.value).first
 							@answer.text = @option.description
 							@answer.option_id = @option.id
+							@answer.save
 						end
-					elsif q.question_type == "MC" && q.selector == "MACOL" # Multiple Choice, Multiple Answer
-						@answer_set = r.xpath(".//*[starts-with(name(), #{q.export_tag})]")
-					end	
-					@answer.save	
+					elsif q.question_type == "MC" && (q.selector == "MACOL" || q.selector == "MAVR") # Multiple Choice, Multiple Answer
+						tag_start = q.export_tag + "_"
+						@answer_set = r.xpath(".//*[starts-with(name(), '#{tag_start}')]")
+						@answer_set.each do |c|
+							initiate_answer(q)
+							@answer.value = c.text
+							@answer.option_id = c.name.partition('_').last  # I AM HERE. NEED TO SET THIS NEXT
+							ap "NEXT"
+							ap c
+							puts c.text
+							puts @answer.option_id
+							@answer.save
+						end
 
+
+
+					end		
 
 				    #t.integer  "response_id"
 				    #t.integer  "survey_id"
@@ -162,4 +174,11 @@ task :get_qualtrics_responses => :environment do
 
 	end
 
+end
+
+def initiate_answer(q)
+	@answer = Answer.new
+	@answer.response_id = @response.id
+	@answer.survey_id = @survey.id
+	@answer.question_id = q.id
 end
