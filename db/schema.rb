@@ -24,13 +24,17 @@ ActiveRecord::Schema.define(version: 20150601200556) do
     t.string   "text"
     t.string   "name"
     t.integer  "option_id"
+    t.integer  "group"
+    t.integer  "rank"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
   end
 
+  add_index "answers", ["group"], name: "index_answers_on_group", using: :btree
   add_index "answers", ["name"], name: "index_answers_on_name", using: :btree
   add_index "answers", ["option_id"], name: "index_answers_on_option_id", using: :btree
   add_index "answers", ["question_id"], name: "index_answers_on_question_id", using: :btree
+  add_index "answers", ["rank"], name: "index_answers_on_rank", using: :btree
   add_index "answers", ["response_id"], name: "index_answers_on_response_id", using: :btree
   add_index "answers", ["survey_id"], name: "index_answers_on_survey_id", using: :btree
   add_index "answers", ["text"], name: "index_answers_on_text", using: :btree
@@ -42,11 +46,21 @@ ActiveRecord::Schema.define(version: 20150601200556) do
     t.string   "industry",        limit: 100
     t.datetime "created_at",                  null: false
     t.datetime "updated_at",                  null: false
+    t.integer  "survey_id"
   end
 
   add_index "business_units", ["industry"], name: "index_business_units_on_industry", using: :btree
   add_index "business_units", ["name"], name: "index_business_units_on_name", using: :btree
   add_index "business_units", ["organization_id"], name: "index_business_units_on_organization_id", using: :btree
+  add_index "business_units", ["survey_id"], name: "index_business_units_on_survey_id", using: :btree
+
+  create_table "deployments", id: false, force: :cascade do |t|
+    t.integer "survey_id"
+    t.integer "business_unit_id"
+  end
+
+  add_index "deployments", ["business_unit_id"], name: "index_deployments_on_business_unit_id", using: :btree
+  add_index "deployments", ["survey_id"], name: "index_deployments_on_survey_id", using: :btree
 
   create_table "options", force: :cascade do |t|
     t.integer  "question_id"
@@ -121,7 +135,6 @@ ActiveRecord::Schema.define(version: 20150601200556) do
   add_index "survey_questions", ["survey_id"], name: "index_survey_questions_on_survey_id", using: :btree
 
   create_table "surveys", force: :cascade do |t|
-    t.integer  "business_unit_id"
     t.string   "survey_name"
     t.integer  "is_active"
     t.string   "owner_id"
@@ -134,13 +147,5 @@ ActiveRecord::Schema.define(version: 20150601200556) do
   add_index "surveys", ["owner_id"], name: "index_surveys_on_owner_id", using: :btree
   add_index "surveys", ["qualtrics_identifier"], name: "index_surveys_on_qualtrics_identifier", using: :btree
   add_index "surveys", ["survey_name"], name: "index_surveys_on_survey_name", using: :btree
-
-  create_table "surveys_business_units", id: false, force: :cascade do |t|
-    t.integer "survey_id"
-    t.integer "business_unit_id"
-  end
-
-  add_index "surveys_business_units", ["business_unit_id"], name: "index_surveys_business_units_on_business_unit_id", using: :btree
-  add_index "surveys_business_units", ["survey_id"], name: "index_surveys_business_units_on_survey_id", using: :btree
 
 end

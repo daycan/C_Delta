@@ -1,6 +1,10 @@
 
+def org_legal_name
+	"Intercorp Peru Ltd."
+end
+
 def	qualtrics_survey_identifier 
-	"SV_bClgHUmIroUjqdv" 
+	"SV_9GCQw97N32SZHhj" 
 end
 
 def user 
@@ -19,7 +23,11 @@ def format
 	"XML"
 end
 
-task :add_survey => :environment do
+def business_unit_question
+	"QID132" # Qualtrics question identifier for question containing current Business Units
+end
+
+task :import_qualtrics_survey => :environment do
 
 	desc "add a survey to the database"
 
@@ -34,14 +42,26 @@ task :add_survey => :environment do
 	survey_xml_doc = HTTParty.get(qualtrics_api_request) # grabs the xml export of the survey structure from qualtrics
 	survey = Nokogiri::XML(survey_xml_doc.body) # turns the xml export of the survey into a parsable format (can us .xpath("//tag")) etc.
 
-	business_unit_id = nil # FIX: business_unit_id is being hard-coded here
 	survey_name = survey.xpath("//SurveyName//text()")
 	is_active = survey.xpath("//isActive").text
 	owner_id = survey.xpath("//OwnerID//text()")
 
 	
-	@survey = Survey.new({:business_unit_id => business_unit_id, :survey_name => survey_name, :is_active => is_active, :owner_id => owner_id, :qualtrics_identifier => qualtrics_survey_identifier})
+	@survey = Survey.new({:survey_name => survey_name, :is_active => is_active, :owner_id => owner_id, :qualtrics_identifier => qualtrics_survey_identifier})
 	@survey.save
+
+	
+	# Cycle through each business unit choice for the survey and add associate this survey with each of those business units
+	query = "//Question[@QuestionID='#{business_unit_question}']"
+	survey.xpath(query).first.xpath(".//Choice").each do |node|
+		bu_name = node.at_xpath(".//Description").text
+		if bu_name != "(Please choose one)" && bu_name != "I work with many companies at once"
+			org = Organization.where(:name_legal => org_legal_name).first
+			bu = org.business_units.where(:name => bu_name).first
+			bu.surveys << @survey
+			bu.save
+		end
+	end
 
 	survey.xpath("//Question").each do |q|
 		@question_identifier = q.first[1] # returns the question number in format [QID71]
@@ -95,7 +115,7 @@ task :add_survey => :environment do
 end
 
 
-task :get_qualtrics_responses => :environment do
+task :import_qualtrics_responses => :environment do
 
 	request = "getLegacyResponseData"
 	qualtrics_api_request = "https://survey.qualtrics.com/WRAPI/ControlPanel/api.php?Request=#{request}&User=#{user}&Token=#{token}&Format=#{format}&Version=#{version}&SurveyID=#{qualtrics_survey_identifier}"
@@ -136,44 +156,59 @@ task :get_qualtrics_responses => :environment do
 						if q.options.where(:option_identifier => @answer.value).exists?
 							@option = q.options.where(:option_identifier => @answer.value).first
 							@answer.text = @option.description
+							@answer.name = q.export_tag
 							@answer.option_id = @option.id
 							@answer.save
 						end
-					elsif q.question_type == "MC" && (q.selector == "MACOL" || q.selector == "MAVR") # Multiple Choice, Multiple Answer
-						tag_start = q.export_tag + "_"
-						@answer_set = r.xpath(".//*[starts-with(name(), '#{tag_start}')]")
+
+					elsif q.question_type == "Slider" # For Questions with Slider bar
+						get_answer_set(q, r) #NEED TO FIX: NOT ALL HAVE THE "_", BUT EXCLUDING BLANK GETS NUMBER W 10X TOO e.g. looking for Q6 will get Q60
+						@answer.value = @answer_set.first.text
+						@answer.name = @answer_set.first.name
+						@answer.save
+
+					elsif (q.question_type == "MC" && (q.selector == "MACOL" || q.selector == "MAVR")) || q.question_type == "Matrix" # Multiple Choice, Multiple Answer (with and without text entry), Matrix type answer (multiple columns and rows)
+						get_answer_set(q, r)
 						@answer_set.each do |c|
 							initiate_answer(q)
 							@answer.value = c.text
-							@answer.option_id = c.name.partition('_').last  # I AM HERE. NEED TO SET THIS NEXT
-							ap "NEXT"
-							ap c
-							puts c.text
-							puts @answer.option_id
+							@answer.name = c.name 
+							unless c.name.split('_')[1].include? 'x' # 'Piped' answers include this 'x' in this case, the survey template does not give any hint to the answers and so the options are not created. Need to design a better way to deal with this here. 
+								@answer.option_id = Option.where(:question_id => q.id, :option_identifier => c.name.split('_')[1]).last.id  
+							end
 							@answer.save
 						end
 
-
-
+					elsif q.question_type == "PGR" # Drag and Drop (and possibly other types)					
+						get_answer_set(q, r)
+						@answer_set.each do |c|
+							puts "Starting with new child"
+							ap c
+							puts c.name
+							if c.name.end_with?("Group")
+								initiate_answer(q)
+								@answer.value = c.text
+								@answer.name = c.name.split('_')[0] + '_' + c.name.split('_')[1]
+								@answer.option_id = Option.where(:question_id => q.id, :option_identifier => c.name.split('_')[1]).last.id  
+								@answer.group = c.text
+								puts "Making a new Answer"
+								ap c
+								puts @answer.name
+								@answer.save
+							elsif c.name.end_with?("Rank")
+								@answer_name = c.name.split('_')[0] + '_' + c.name.split('_')[1] # Strip 'Rank' out of the tag name
+								puts "Adding the Rank"
+								puts @answer_name
+								@answer = Answer.where(:response_id => @response.id, :name => @answer_name).first
+								@answer.rank = c.text
+								@answer.save
+							end
+						end
 					end		
-
-				    #t.integer  "response_id"
-				    #t.integer  "survey_id"
-				    #t.integer  "question_id"
-				    #t.string   "value"
-				    #t.string   "text"
-				    #t.string   "name"
-				    #t.integer  "option_id"
-				    #t.datetime "created_at",  null: false
-				    #t.datetime "updated_at",  null: false
 				end
-
 			end
-
 		end
-
 	end
-
 end
 
 def initiate_answer(q)
@@ -181,4 +216,9 @@ def initiate_answer(q)
 	@answer.response_id = @response.id
 	@answer.survey_id = @survey.id
 	@answer.question_id = q.id
+end
+
+def get_answer_set(q, r)
+	tag_start = q.export_tag + "_"
+	@answer_set = r.xpath(".//*[starts-with(name(), '#{tag_start}')]")
 end

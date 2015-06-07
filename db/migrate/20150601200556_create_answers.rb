@@ -8,6 +8,9 @@ class CreateAnswers < ActiveRecord::Migration
       t.string :text
       t.string :name
       t.integer :option_id
+      t.integer :group
+      t.integer :rank
+
 
       t.timestamps null: false
     end
@@ -18,5 +21,8 @@ class CreateAnswers < ActiveRecord::Migration
     add_index :answers, :value
     add_index :answers, :text
     add_index :answers, :name
+    add_index :answers, :group
+    add_index :answers, :rank
+
   end
 end

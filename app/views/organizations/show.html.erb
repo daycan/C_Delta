@@ -4,7 +4,7 @@
 <%= link_to 'Back', organizations_path %>
 
 <div class="organizations show">
-  	<h2>Show Organization</h2>
+  	<h2><%= @organization.name_informal %></h2>
 
   	<table summary="Organization Detail View">
 	  	<tr>
@@ -47,11 +47,12 @@
 		  	  <td class="actions">
 		  	  	<%= link_to("Show", '#', :class => 'action show') %>
 		  	  	<%= link_to("Edit", '#', :class => 'action edit') %>
-		  	  	<%= link_to("Delete", '#', :class => 'action delete') %>
+		  	  	<%= link_to("Destroy", '#' :class => 'action delete') %>
 		  	  </td>
 		  	</tr>
 		<% end %>
 	</table>
+
 
 	<%= form_for @business_unit, :url => create_business_unit_organization_path(@organization) do |f| %>
 		  <table summary="Business Unit form fields">
