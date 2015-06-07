@@ -50,7 +50,7 @@ class BusinessUnitsController < ApplicationController
     @organization = Organization.find(params[:organization_id])
     @business_unit = BusinessUnit.find(params[:id]).destroy
     flash[:notice] = "Business Unit destroyed successfully."
-    redirect_to(:controller => 'organization', :action => 'show', :id => @organization.id )
+    redirect_to @organization
   end
 
   private

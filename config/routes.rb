@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
 
   resources :organizations do
+    resources :business_units
     member do
       post 'create_business_unit'
     end
