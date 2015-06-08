@@ -27,6 +27,11 @@ def business_unit_question
 	"QID132" # Qualtrics question identifier for question containing current Business Units
 end
 
+def business_unit_question_export_tag
+	"Q3"
+end
+
+
 task :import_qualtrics_survey => :environment do
 
 	desc "add a survey to the database"
@@ -125,6 +130,9 @@ task :import_qualtrics_responses => :environment do
 	# This SHOULD (does not currently) get the RIGHT survey associated with the response. 
 	@survey = Survey.where({:qualtrics_identifier => qualtrics_survey_identifier }).order("created_at DESC").last
 
+	@business_units = Organization.where(:name_legal => org_legal_name).first.business_units
+	@business_unit_options = @survey.questions.where(:question_identifier => business_unit_question).first.options
+
 	response.xpath("//Response").each do |r|
 		qualtrics_response_id = r.xpath("./ResponseID").text
 		if Response.where(qualtrics_response_id: qualtrics_response_id).blank? # Only creates a new response if no response exists with the same response identifier
@@ -137,7 +145,14 @@ task :import_qualtrics_responses => :environment do
 			end_date = r.xpath("./EndDate").text
 			finished = r.xpath("./Finished").text
 
-			business_unit_id = 1 # FIX THIS HARD CODING
+			business_unit_answer_choice = r.xpath(".//#{business_unit_question_export_tag}").text
+			
+
+			business_unit_name = @business_unit_options.where(:option_identifier => business_unit_answer_choice).first.description
+			puts "FIGURING OUT THE BUSINESS UNIT"
+			ap business_unit_name
+			ap business_unit_answer_choice
+			business_unit_id = @business_units.where(:name => business_unit_name).first.id
 
 			@response = Response.new(:business_unit_id => business_unit_id, :qualtrics_response_id => qualtrics_response_id, :qualtrics_response_set => qualtrics_response_set, :name => name, :email => email, :ip_address => ip_address, :status => status, :start_date => status, :end_date => end_date, :finished => finished)
 			@response.save
@@ -179,26 +194,18 @@ task :import_qualtrics_responses => :environment do
 							@answer.save
 						end
 
-					elsif q.question_type == "PGR" # Drag and Drop (and possibly other types)					
+					elsif q.question_type == "PGR" # Drag and Drop (and possibly other types)			
 						get_answer_set(q, r)
 						@answer_set.each do |c|
-							puts "Starting with new child"
-							ap c
-							puts c.name
 							if c.name.end_with?("Group")
 								initiate_answer(q)
 								@answer.value = c.text
 								@answer.name = c.name.split('_')[0] + '_' + c.name.split('_')[1]
 								@answer.option_id = Option.where(:question_id => q.id, :option_identifier => c.name.split('_')[1]).last.id  
 								@answer.group = c.text
-								puts "Making a new Answer"
-								ap c
-								puts @answer.name
 								@answer.save
 							elsif c.name.end_with?("Rank")
 								@answer_name = c.name.split('_')[0] + '_' + c.name.split('_')[1] # Strip 'Rank' out of the tag name
-								puts "Adding the Rank"
-								puts @answer_name
 								@answer = Answer.where(:response_id => @response.id, :name => @answer_name).first
 								@answer.rank = c.text
 								@answer.save

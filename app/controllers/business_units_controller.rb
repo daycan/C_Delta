@@ -4,6 +4,7 @@ class BusinessUnitsController < ApplicationController
   end
 
   def show
+    @organization = Organization.find(params[:organization_id])
     @business_unit = BusinessUnit.find(params[:id])
   end
 

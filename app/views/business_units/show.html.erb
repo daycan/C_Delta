@@ -1,3 +1,5 @@
-<h1>BusinessUnits#show</h1>
-<p>Find me in app/views/business_units/show.html.erb</p>
+<h3><%= @organization.name_informal %></h1>
+<h1><%= @business_unit.name %></h1>
+<p>Total Responses: <%= @business_unit.responses.count %></p>
+
 <%= params.inspect %>
