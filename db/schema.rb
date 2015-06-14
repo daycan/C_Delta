@@ -106,6 +106,7 @@ ActiveRecord::Schema.define(version: 20150601200556) do
 
   create_table "responses", force: :cascade do |t|
     t.integer  "business_unit_id"
+    t.integer  "survey_id"
     t.string   "qualtrics_response_id"
     t.string   "qualtrics_response_set"
     t.string   "name"
@@ -123,6 +124,7 @@ ActiveRecord::Schema.define(version: 20150601200556) do
   add_index "responses", ["end_date"], name: "index_responses_on_end_date", using: :btree
   add_index "responses", ["finished"], name: "index_responses_on_finished", using: :btree
   add_index "responses", ["start_date"], name: "index_responses_on_start_date", using: :btree
+  add_index "responses", ["survey_id"], name: "index_responses_on_survey_id", using: :btree
 
   create_table "survey_questions", force: :cascade do |t|
     t.integer  "question_id"

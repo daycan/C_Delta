@@ -4,7 +4,7 @@ def org_legal_name
 end
 
 def	qualtrics_survey_identifier 
-	"SV_9GCQw97N32SZHhj" 
+	"SV_cJbLYHJ9Sp31nF3" 
 end
 
 def user 
@@ -144,6 +144,7 @@ task :import_qualtrics_responses => :environment do
 			start_date = r.xpath("./StartDate").text
 			end_date = r.xpath("./EndDate").text
 			finished = r.xpath("./Finished").text
+			survey_id = @survey.id
 
 			business_unit_answer_choice = r.xpath(".//#{business_unit_question_export_tag}").text
 			
@@ -154,7 +155,7 @@ task :import_qualtrics_responses => :environment do
 			ap business_unit_answer_choice
 			business_unit_id = @business_units.where(:name => business_unit_name).first.id
 
-			@response = Response.new(:business_unit_id => business_unit_id, :qualtrics_response_id => qualtrics_response_id, :qualtrics_response_set => qualtrics_response_set, :name => name, :email => email, :ip_address => ip_address, :status => status, :start_date => status, :end_date => end_date, :finished => finished)
+			@response = Response.new(:survey_id => survey_id, :business_unit_id => business_unit_id, :qualtrics_response_id => qualtrics_response_id, :qualtrics_response_set => qualtrics_response_set, :name => name, :email => email, :ip_address => ip_address, :status => status, :start_date => status, :end_date => end_date, :finished => finished)
 			@response.save
 
 			#cycle through questions and run the logic grabbing the answers from the current Response 'r'
